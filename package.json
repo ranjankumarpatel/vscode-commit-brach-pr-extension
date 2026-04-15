@@ -1,0 +1,54 @@
+{
+  "name": "github-web-style-commit-pr",
+  "displayName": "GitHub Web Style Commit PR",
+  "description": "Commit uncommitted changes to a new branch and create a pull request with a GitHub Web style workflow.",
+  "version": "0.0.1",
+  "publisher": "ranjankumarpatel",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ranjankumarpatel/vscode-commit-brach-pr-extension.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Source Control",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:githubWebStyle.commitToNewBranchAndCreatePr"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "githubWebStyle.commitToNewBranchAndCreatePr",
+        "title": "GitHub Web Style: Commit to New Branch and Create PR",
+        "category": "GitHub Web Style",
+        "icon": "$(git-branch)"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "githubWebStyle.commitToNewBranchAndCreatePr",
+          "when": "scmProvider == git",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package:vsix": "vsce package"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^2.30.0",
+    "@types/node": "^20.14.10",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.6.2"
+  }
+}
