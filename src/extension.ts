@@ -6,7 +6,6 @@ const COMMAND_ID = 'githubWebStyle.commitToNewBranchAndCreatePr';
 const OPEN_PR_ACTION = 'Open PR';
 const DEFAULT_BRANCH_CANDIDATES = ['main', 'master'];
 const MAX_COMMAND_OUTPUT = 10 * 1024 * 1024;
-const MAX_COPILOT_DIFF_CHARS = 20_000;
 
 interface CommandResult {
   readonly stdout: string;
@@ -24,12 +23,19 @@ interface RepositoryContext {
   readonly workspaceFolder: vscode.WorkspaceFolder;
   readonly repoPath: string;
   readonly repoName: string;
+  readonly copilotCliCommand: CopilotCliCommand;
 }
 
 interface CheckoutRef {
   readonly label: string;
   readonly value: string;
   readonly branchName?: string;
+}
+
+interface CopilotCliCommand {
+  readonly command: string;
+  readonly argsPrefix: readonly string[];
+  readonly label: string;
 }
 
 interface WorkflowState {
@@ -42,6 +48,19 @@ class UserFacingError extends Error {
     this.name = 'UserFacingError';
   }
 }
+
+const COPILOT_CLI_CANDIDATES: readonly CopilotCliCommand[] = [
+  {
+    command: 'copilot',
+    argsPrefix: [],
+    label: '`copilot`'
+  },
+  {
+    command: 'gh',
+    argsPrefix: ['copilot', '--'],
+    label: '`gh copilot`'
+  }
+];
 
 export function activate(context: vscode.ExtensionContext): void {
   const disposable = vscode.commands.registerCommand(COMMAND_ID, async (scmContext?: unknown) => {
@@ -77,7 +96,12 @@ async function runCreatePullRequestWorkflow(scmContext?: unknown): Promise<void>
         title: 'GitHub Web Style: generating commit message with Copilot',
         cancellable: false
       },
-      async (progress) => generateCommitMessageWithCopilot(repositoryContext.repoPath, progress)
+      async (progress) =>
+        generateCommitMessageWithCopilot(
+          repositoryContext.repoPath,
+          repositoryContext.copilotCliCommand,
+          progress
+        )
     );
 
     const commitMessage = await promptForCommitMessage(repositoryContext.repoName, generatedCommitMessage);
@@ -183,7 +207,7 @@ async function validateRepositoryContext(
   await ensureGhAuthenticated(repoPath);
 
   progress.report({ message: 'Checking Copilot CLI availability...', increment: 15 });
-  await ensureCopilotCliAvailable(repoPath);
+  const copilotCliCommand = await resolveCopilotCliCommand(repoPath);
 
   progress.report({ message: 'Inspecting uncommitted changes...', increment: 10 });
   await ensureWorkingTreeHasChanges(repoPath);
@@ -193,7 +217,8 @@ async function validateRepositoryContext(
   return {
     workspaceFolder,
     repoPath,
-    repoName: path.basename(repoPath)
+    repoName: path.basename(repoPath),
+    copilotCliCommand
   };
 }
 
@@ -244,17 +269,22 @@ async function ensureGhAuthenticated(repoPath: string): Promise<void> {
   }
 }
 
-async function ensureCopilotCliAvailable(repoPath: string): Promise<void> {
-  try {
-    await runCommand('gh', ['copilot', '--', '--version'], {
-      cwd: repoPath,
-      missingToolMessage: 'GitHub Copilot CLI is not installed or not available through `gh copilot`.'
-    });
-  } catch {
-    throw new UserFacingError(
-      'GitHub Copilot CLI is not available. Install or enable Copilot CLI so the extension can generate a commit message.'
-    );
+async function resolveCopilotCliCommand(repoPath: string): Promise<CopilotCliCommand> {
+  for (const candidate of COPILOT_CLI_CANDIDATES) {
+    try {
+      await runCommand(candidate.command, [...candidate.argsPrefix, '--version'], {
+        cwd: repoPath,
+        missingToolMessage: `GitHub Copilot CLI (${candidate.label}) is not available on PATH.`
+      });
+      return candidate;
+    } catch {
+      // Try the next supported entry point before surfacing a user-facing error.
+    }
   }
+
+  throw new UserFacingError(
+    'GitHub Copilot CLI is not available. Install or enable `copilot` or `gh copilot`, restart VS Code, and try again.'
+  );
 }
 
 async function ensureWorkingTreeHasChanges(repoPath: string): Promise<void> {
@@ -287,19 +317,18 @@ async function promptForCommitMessage(
 
 async function generateCommitMessageWithCopilot(
   repoPath: string,
+  copilotCliCommand: CopilotCliCommand,
   progress: vscode.Progress<{ message?: string; increment?: number }>
 ): Promise<string> {
-  progress.report({ message: 'Collecting repository diff...', increment: 35 });
-  const commitContext = await buildCopilotCommitContext(repoPath);
-
-  progress.report({ message: 'Asking Copilot for a commit message...', increment: 65 });
+  progress.report({ message: 'Asking Copilot to inspect repository changes...', increment: 100 });
 
   try {
-    const result = await runGh(repoPath, [
-      'copilot',
-      '--',
-      '-sp',
-      createCopilotCommitPrompt(commitContext)
+    const result = await runCopilot(repoPath, copilotCliCommand, [
+      '-p',
+      createCopilotCommitPrompt(),
+      '-s',
+      '--no-ask-user',
+      '--allow-all-tools'
     ]);
 
     const commitMessage = sanitizeCopilotCommitMessage(result.stdout);
@@ -319,37 +348,14 @@ async function generateCommitMessageWithCopilot(
   }
 }
 
-async function buildCopilotCommitContext(repoPath: string): Promise<string> {
-  const [statusResult, diffResult] = await Promise.all([
-    runGit(repoPath, ['status', '--short', '--untracked-files=all']),
-    runGit(repoPath, ['diff', '--no-ext-diff', '--submodule=diff', '--', '.'])
-  ]);
-
-  const status = statusResult.stdout.trim();
-  const diff = diffResult.stdout.trim();
-
-  if (!status && !diff) {
-    throw new UserFacingError('There are no changes available to summarize for a commit message.');
-  }
-
-  const trimmedDiff =
-    diff.length > MAX_COPILOT_DIFF_CHARS
-      ? `${diff.slice(0, MAX_COPILOT_DIFF_CHARS)}\n\n[diff truncated]`
-      : diff;
-
-  return [`Repository status:`, status || '(no status output)', '', `Unified diff:`, trimmedDiff || '(no diff output)'].join(
-    '\n'
-  );
-}
-
-function createCopilotCommitPrompt(commitContext: string): string {
+function createCopilotCommitPrompt(): string {
   return [
-    'Write a concise Git commit message for these uncommitted changes.',
+    'Inspect the current repository changes with git commands before answering.',
+    'Use `git status --short --untracked-files=all`, `git diff --no-ext-diff --submodule=diff -- .`, and `git diff --cached --no-ext-diff --submodule=diff -- .` as needed.',
+    'Then write a concise Git commit message for the current uncommitted changes.',
     'Return only one commit subject line.',
     'Do not include quotes, bullets, markdown, or explanations.',
-    'Keep it under 72 characters when practical.',
-    '',
-    commitContext
+    'Keep it under 72 characters when practical.'
   ].join('\n');
 }
 
@@ -619,6 +625,17 @@ async function runGh(repoPath: string, args: string[]): Promise<CommandResult> {
   return runCommand('gh', args, {
     cwd: repoPath,
     missingToolMessage: 'GitHub CLI (`gh`) is not installed or not available on PATH.'
+  });
+}
+
+async function runCopilot(
+  repoPath: string,
+  copilotCliCommand: CopilotCliCommand,
+  args: string[]
+): Promise<CommandResult> {
+  return runCommand(copilotCliCommand.command, [...copilotCliCommand.argsPrefix, ...args], {
+    cwd: repoPath,
+    missingToolMessage: `GitHub Copilot CLI (${copilotCliCommand.label}) is not available on PATH.`
   });
 }
 
