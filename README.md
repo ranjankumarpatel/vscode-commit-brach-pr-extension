@@ -2,6 +2,7 @@
 
 VS Code extension that recreates the GitHub Web flow:
 
+
 `Create a new branch for this commit and start a pull request`
 
 The extension works on the current project repository, generates a commit message with GitHub Copilot CLI by inspecting the repository changes, creates a new branch automatically, commits the changes, pushes the branch, and opens a pull request.
