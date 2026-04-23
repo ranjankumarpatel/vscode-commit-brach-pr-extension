@@ -5,7 +5,7 @@ VS Code extension that recreates the GitHub Web flow:
 
 `Create a new branch for this commit and start a pull request`
 
-The extension works on the current project repository, generates a commit message with GitHub Copilot CLI by inspecting the repository changes, creates a new branch automatically, commits the changes, pushes the branch, and opens a pull request.
+The extension works on the current project repository, opens an editor for your commit message, creates a new branch automatically, commits the changes, pushes the branch, and opens a pull request.
 
 ## Command
 
@@ -20,14 +20,15 @@ The command is available from:
 
 When you run the command in a git project with uncommitted changes, the extension:
 
-1. Validates `git`, `gh`, GitHub auth, Copilot CLI, repo state, and local changes
-2. Uses `copilot` or `gh copilot` to inspect the project changes and generate a commit message suggestion
-3. Lets you review or edit that commit message
-4. Creates a new branch automatically as `patch-pr-<timestamp>`
-5. Commits the current uncommitted changes on that new branch
-6. Pushes the branch to `origin`
-7. Creates a pull request with `gh pr create --base <current-branch> --head <new-branch> --fill`
-8. Shows the PR URL with an `Open PR` button
+1. Validates `git`, `gh`, GitHub auth, repo state, and local changes
+2. Shows a confirmation preview of the pending files that will be committed
+3. Opens a commit message editor where you can write a single-line or multiline commit message
+4. Uses the exact message from that editor when creating the commit
+5. Creates a new branch automatically as `patch-pr-<timestamp>`
+6. Commits the current uncommitted changes on that new branch
+7. Pushes the branch to `origin`
+8. Creates a pull request with `gh pr create --base <current-branch> --head <new-branch> --fill`
+9. Shows the PR URL with an `Open PR` button
 
 The branch is created from the current checked out branch or commit context, so it behaves like GitHub Web's "create a new branch for this commit" flow. When you are on a branch, that branch is also used as the pull request base. When you are in detached HEAD state, the extension falls back to the repository default branch for the PR base.
 
@@ -36,7 +37,6 @@ The branch is created from the current checked out branch or commit context, so 
 - `git` installed and available on `PATH`
 - `gh` installed and available on `PATH`
 - `gh auth login` already completed
-- GitHub Copilot CLI available either as `copilot` or through `gh copilot`
 - Opened workspace folder must be inside a git repository with an `origin` remote
 - The repository must have uncommitted changes
 
@@ -52,13 +52,13 @@ The branch is created from the current checked out branch or commit context, so 
 
 The latest packaged VSIX in this repo is:
 
-- `github-web-style-commit-pr-0.0.4.vsix`
+- `github-web-style-commit-pr-0.0.6.vsix`
 
 To install it:
 
 1. Open VS Code
 2. Run `Extensions: Install from VSIX...`
-3. Choose `github-web-style-commit-pr-0.0.4.vsix`
+3. Choose `github-web-style-commit-pr-0.0.6.vsix`
 4. Reload VS Code if prompted
 
 ## Package A New VSIX

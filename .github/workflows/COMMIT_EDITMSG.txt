@@ -1,0 +1,1 @@
+Refactor commit message handling and update extension version to 0.0.6
