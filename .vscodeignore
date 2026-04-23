@@ -1,6 +1,8 @@
 .git/**
+.github/**
 .gitignore
 .qodo/**
+AGENTS.md
 src/**
 tsconfig.json
 node_modules/**
