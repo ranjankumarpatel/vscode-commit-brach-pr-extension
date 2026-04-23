@@ -2,6 +2,7 @@
 
 VS Code extension that recreates the GitHub Web flow:
 
+
 `Create a new branch for this commit and start a pull request`
 
 The extension works on the current project repository, opens an editor for your commit message, creates a new branch automatically, commits the changes, pushes the branch, and opens a pull request.
@@ -26,10 +27,10 @@ When you run the command in a git project with uncommitted changes, the extensio
 5. Creates a new branch automatically as `patch-pr-<timestamp>`
 6. Commits the current uncommitted changes on that new branch
 7. Pushes the branch to `origin`
-8. Creates a pull request with `gh pr create`
+8. Creates a pull request with `gh pr create --base <current-branch> --head <new-branch> --fill`
 9. Shows the PR URL with an `Open PR` button
 
-The branch is created from the current checked out branch or commit context, so it behaves like GitHub Web's "create a new branch for this commit" flow.
+The branch is created from the current checked out branch or commit context, so it behaves like GitHub Web's "create a new branch for this commit" flow. When you are on a branch, that branch is also used as the pull request base. When you are in detached HEAD state, the extension falls back to the repository default branch for the PR base.
 
 ## Prerequisites
 
@@ -72,4 +73,6 @@ This creates a versioned `.vsix` file in the repo root.
 
 - The extension uses the target repository as the working directory, so it tracks the changes of the project where you invoke the command.
 - In multi-root workspaces, it tries to use the SCM repository context you clicked from.
+- If multiple workspace folders are open and there is no SCM context, the extension asks you to pick the repository folder.
+- If pull request creation fails after switching branches, the extension tries to switch back to your original branch or commit.
 - If you want VS Code to recognize a new build as an upgrade, bump the version in `package.json` before packaging.
