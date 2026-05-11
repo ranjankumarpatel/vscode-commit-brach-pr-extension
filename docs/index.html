@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Web Style Commit PR – VS Code Extension</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --link: #58a6ff;
+      --code-bg: #161b22;
+      --badge-bg: #21262d;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header svg { color: var(--text); }
+    header span { font-weight: 600; font-size: 15px; color: var(--text); }
+
+    .hero {
+      text-align: center;
+      padding: 80px 24px 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero .badge {
+      display: inline-block;
+      background: var(--badge-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); text-decoration: none; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-secondary:hover { background: var(--surface); text-decoration: none; }
+
+    .command-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 28px;
+      margin: 0 auto;
+      max-width: 640px;
+      text-align: left;
+    }
+
+    .command-box .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .command-box code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px;
+      color: var(--link);
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 14px;
+      display: block;
+    }
+
+    section {
+      padding: 48px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    section h2 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .workflow { display: grid; gap: 16px; }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+
+    .step-number {
+      background: var(--link);
+      color: #0d1117;
+      font-weight: 700;
+      font-size: 13px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-content strong { display: block; margin-bottom: 4px; }
+    .step-content p { color: var(--muted); font-size: 14px; }
+    .step-content code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+    }
+
+    .prereqs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .prereq-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .prereq-card code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      color: var(--link);
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .prereq-card p { margin-top: 6px; font-size: 13px; color: var(--muted); }
+
+    .install-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .version-badge {
+      display: inline-block;
+      background: var(--badge-bg);
+      border: 1px solid var(--accent);
+      color: #3fb950;
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .install-box ol { padding-left: 20px; display: grid; gap: 10px; }
+    .install-box li { color: var(--muted); }
+    .install-box li strong { color: var(--text); }
+    .install-box code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 13px;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: var(--link);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer a { color: var(--link); }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/>
+  </svg>
+  <span>GitHub Web Style Commit PR</span>
+</header>
+
+<div class="hero">
+  <div class="badge">VS Code Extension &middot; v0.0.6</div>
+  <h1>GitHub Web Style<br>Commit &amp; PR</h1>
+  <p>Recreate the GitHub Web flow &mdash; commit to a new branch and open a pull request without leaving VS Code.</p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="https://github.com/ranjankumarpatel/vscode-commit-brach-pr-extension/raw/main/github-web-style-commit-pr-0.0.6.vsix">
+      &#8595; Download v0.0.6 (.vsix)
+    </a>
+    <a class="btn-secondary" href="https://github.com/ranjankumarpatel/vscode-commit-brach-pr-extension">
+      View on GitHub
+    </a>
+  </div>
+  <div class="command-box">
+    <div class="label">Command Palette</div>
+    <code>GitHub Web Style: Commit to New Branch and Create PR</code>
+  </div>
+</div>
+
+<section>
+  <h2>How It Works</h2>
+  <div class="workflow">
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <strong>Validates your environment</strong>
+        <p>Checks git, gh CLI, GitHub auth, repo state, and that you have uncommitted changes.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <strong>Shows a preview</strong>
+        <p>Displays a confirmation of the pending files that will be committed.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <strong>Opens a commit message editor</strong>
+        <p>Write a single-line or multiline commit message &mdash; the exact text is used for the commit.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <strong>Creates a new branch automatically</strong>
+        <p>Named <code>patch-pr-&lt;timestamp&gt;</code>, branched from your currently checked-out branch.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">5</div>
+      <div class="step-content">
+        <strong>Commits, pushes, and opens a PR</strong>
+        <p>Commits your changes, pushes to origin, and creates a pull request targeting your original branch.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">6</div>
+      <div class="step-content">
+        <strong>Shows the PR URL</strong>
+        <p>An <em>Open PR</em> button appears so you can jump straight to the pull request.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Prerequisites</h2>
+  <div class="prereqs">
+    <div class="prereq-card">
+      <code>git</code>
+      <p>Installed and available on PATH</p>
+    </div>
+    <div class="prereq-card">
+      <code>gh</code>
+      <p>GitHub CLI installed and on PATH</p>
+    </div>
+    <div class="prereq-card">
+      <code>gh auth login</code>
+      <p>Already authenticated with GitHub</p>
+    </div>
+    <div class="prereq-card">
+      <code>origin</code>
+      <p>Workspace inside a git repo with an origin remote and uncommitted changes</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Installation</h2>
+  <div class="install-box">
+    <div class="version-badge">Latest: v0.0.6</div>
+    <ol>
+      <li><strong>Download</strong> <a href="https://github.com/ranjankumarpatel/vscode-commit-brach-pr-extension/raw/main/github-web-style-commit-pr-0.0.6.vsix">github-web-style-commit-pr-0.0.6.vsix</a></li>
+      <li>Open <strong>VS Code</strong></li>
+      <li>Open the Command Palette and run <strong>Extensions: Install from VSIX&hellip;</strong></li>
+      <li>Select the downloaded <code>.vsix</code> file</li>
+      <li>Reload VS Code if prompted</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <p>Licensed under <a href="https://github.com/ranjankumarpatel/vscode-commit-brach-pr-extension/blob/main/LICENSE">Apache-2.0</a> &nbsp;&middot;&nbsp; <a href="https://github.com/ranjankumarpatel/vscode-commit-brach-pr-extension">GitHub Repository</a></p>
+</footer>
+
+</body>
+</html>

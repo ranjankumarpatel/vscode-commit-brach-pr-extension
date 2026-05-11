@@ -2,8 +2,9 @@
 
 VS Code extension that recreates the GitHub Web flow:
 
-
 `Create a new branch for this commit and start a pull request`
+
+**Project website:** https://ranjankumarpatel.github.io/vscode-commit-brach-pr-extension/
 
 The extension works on the current project repository, opens an editor for your commit message, creates a new branch automatically, commits the changes, pushes the branch, and opens a pull request.
 
