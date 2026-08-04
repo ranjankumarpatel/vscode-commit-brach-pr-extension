@@ -2,7 +2,12 @@
 .github/**
 .gitignore
 .qodo/**
+.agents/**
+.idea/**
 AGENTS.md
+CLAUDE.md
+skills-lock.json
+docs/**
 src/**
 tsconfig.json
 node_modules/**
