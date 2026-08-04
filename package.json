@@ -2,8 +2,9 @@
   "name": "github-web-style-commit-pr",
   "displayName": "GitHub Web Style Commit PR",
   "description": "Commit uncommitted changes to a new branch and create a pull request with a GitHub Web style workflow.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publisher": "ranjankumarpatel",
+  "icon": "images/extension-icon.png",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
