@@ -13,7 +13,7 @@
     "vscode": "^1.90.0"
   },
   "categories": [
-    "Source Control",
+    "SCM Providers",
     "Other"
   ],
   "activationEvents": [
