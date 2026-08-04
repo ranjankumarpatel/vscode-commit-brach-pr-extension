@@ -29,8 +29,8 @@
 
 ## Packaging
 
-- Current version: `0.0.6`
-- Current packaged file: `github-web-style-commit-pr-0.0.6.vsix`
+- Current version: `0.0.7`
+- Current packaged file: `github-web-style-commit-pr-0.0.7.vsix`
 - Package command: `npm run package:vsix`
 
 ## Validation Expectations

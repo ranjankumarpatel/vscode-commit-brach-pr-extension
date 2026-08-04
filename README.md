@@ -4,6 +4,8 @@ VS Code extension that recreates the GitHub Web flow:
 
 `Create a new branch for this commit and start a pull request`
 
+**Install from the VS Code Marketplace:** [GitHub Web Style Commit PR](https://marketplace.visualstudio.com/items?itemName=ranjankumarpatel.github-web-style-commit-pr)
+
 **Project website:** https://ranjankumarpatel.github.io/vscode-commit-brach-pr-extension/
 
 The extension works on the current project repository, opens an editor for your commit message, creates a new branch automatically, commits the changes, pushes the branch, and opens a pull request.
@@ -49,17 +51,28 @@ The branch is created from the current checked out branch or commit context, so 
 4. In the new window, open any git project with uncommitted changes
 5. Run `GitHub Web Style: Commit to New Branch and Create PR`
 
-## Install As A VS Code Extension
+## Install
 
-The latest packaged VSIX in this repo is:
+### VS Code Marketplace
 
-- `github-web-style-commit-pr-0.0.6.vsix`
+1. Open the [extension's Marketplace page](https://marketplace.visualstudio.com/items?itemName=ranjankumarpatel.github-web-style-commit-pr)
+2. Select **Install**
 
-To install it:
+You can also open the Extensions view in VS Code, search for `GitHub Web Style Commit PR`, and select **Install**.
+
+To install from the command line:
+
+```sh
+code --install-extension ranjankumarpatel.github-web-style-commit-pr
+```
+
+### Install From VSIX
+
+The latest packaged VSIX in this repo is `github-web-style-commit-pr-0.0.7.vsix`.
 
 1. Open VS Code
 2. Run `Extensions: Install from VSIX...`
-3. Choose `github-web-style-commit-pr-0.0.6.vsix`
+3. Choose `github-web-style-commit-pr-0.0.7.vsix`
 4. Reload VS Code if prompted
 
 ## Package A New VSIX
